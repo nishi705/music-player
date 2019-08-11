@@ -1,0 +1,62 @@
+version: "3"
+services:
+
+  mongodb:
+    image: mongo
+    container_name: mongodb-springboot
+    restart: always
+    volumes:
+      - $HOME/data/:/data/db
+
+  #  Container for java
+  #  docker run -d --name track-service-java -p 8080:8080 -network host spring-boot-java
+  track-service:
+     build: docker-trackservice-mongodb1-master/.
+     container_name: track-service
+     restart: always
+     depends_on:
+       - mongodb
+       - config-server
+       - eureka-server
+     links:
+       - mongodb
+       - eureka-server
+       - config-server
+
+
+   #  Container for Mongo
+  # docker run -d --name track-service-mongo -p 27017 -network host mongo
+  api-gateway:
+      build: api-gateway-pattern/.
+      container_name: api-gateway-pattern
+      restart: always
+      ports:
+      - 8085:8085
+
+  #  Container for mongo
+  # docker run -d --name track-service-mongo -p 27017 -network host mongo
+  config-server:
+      build: config-server/
+      container_name: config-server
+      restart: always
+      ports:
+        - 8000:8000
+
+
+
+  #  Container for Mongo
+  # docker run -d --name track-service-mongo -p 27017 -network host mongo
+  eureka-server:
+    build: eureka-server/.
+    container_name: eureka-server
+    restart: always
+    ports:
+      - 9090:9090
+
+
+  #  Container for Mongo
+  # docker run -d --name track-service-mongo -p 27017 -network host mongo
+  user-services:
+    build: user-services/.
+    container_name: user-services
+    restart: always
